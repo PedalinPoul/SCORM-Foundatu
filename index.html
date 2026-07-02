@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Completion Reports to Feedback Loops — A Learning Measurement Briefing</title>
+<meta name="description" content="How weekly retail trainings become measurable feedback loops: connecting business priorities, skills, learning signals, insights, and actions.">
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #ffffff;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --hairline: rgba(11, 11, 11, 0.10);
+    --gridline: #e1e0d9;
+    --accent: #2a78d6;        /* marks, node highlights */
+    --accent-deep: #1c5cab;   /* accent used as text */
+    --accent-wash: #eaf2fc;
+    --accent-track: #cde2fb;  /* meter track: lighter step of same ramp */
+    --good-text: #006300;
+    --radius: 12px;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --stepper-h: 0px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: transparent;
+    z-index: 60;
+  }
+  .progress > div {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+  }
+
+  /* ---------- shared layout ---------- */
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .kicker {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    max-width: 22ch;
+  }
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+    max-width: 26ch;
+  }
+  h3 {
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+    font-weight: 650;
+  }
+  .lead {
+    font-size: 1.08rem;
+    color: var(--ink-2);
+    max-width: 58ch;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 88px 0 64px;
+    border-bottom: 1px solid var(--gridline);
+    background: var(--surface);
+  }
+  .hero .lead { margin-top: 20px; }
+  .hero-tiles {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    align-items: stretch;
+  }
+  .stat-tile {
+    background: var(--page);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    min-width: 180px;
+  }
+  .stat-tile .label {
+    font-size: 0.82rem;
+    color: var(--ink-2);
+  }
+  .stat-tile .value {
+    font-size: 2.1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+  .hero-tiles .aside {
+    align-self: center;
+    max-width: 34ch;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+    padding: 0 4px;
+  }
+  .hero-tiles .aside strong { color: var(--ink); }
+
+  /* ---------- section scaffolding ---------- */
+  .band {
+    padding: 72px 0;
+    border-bottom: 1px solid var(--gridline);
+  }
+  .band-head { margin-bottom: 36px; }
+  .band-head .lead { margin-top: 14px; }
+
+  /* ---------- scrolly: sticky flow map + steps ---------- */
+  .scrolly {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .flowmap {
+    position: sticky;
+    top: 24px;
+  }
+  .flowmap ol {
+    list-style: none;
+  }
+  .flowmap li { position: relative; }
+  .flowmap li + li { margin-top: 26px; }
+  /* connector arrow between nodes */
+  .flowmap li + li::before {
+    content: "";
+    position: absolute;
+    left: 21px;
+    top: -22px;
+    width: 2px;
+    height: 14px;
+    background: var(--gridline);
+  }
+  .flowmap li + li::after {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: -9px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--gridline);
+  }
+  .flowmap li.done + li::before { background: var(--accent); }
+  .flowmap li.done + li::after { border-top-color: var(--accent); }
+  .flowmap li.active + li::before { background: var(--accent); }
+  .flowmap li.active + li::after { border-top-color: var(--accent); }
+
+  .flow-node {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+  }
+  .flow-node .num {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+    transition: inherit;
+  }
+  .flow-node:hover { border-color: var(--accent); color: var(--ink); }
+  li.done .flow-node .num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  li.done .flow-node { color: var(--ink); }
+  li.active .flow-node {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  li.active .flow-node .num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .flowmap-caption {
+    margin-top: 20px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    max-width: 30ch;
+  }
+
+  /* ---------- step sections ---------- */
+  .steps > section {
+    scroll-margin-top: calc(24px + var(--stepper-h));
+    padding: 8px 0 72px;
+  }
+  .steps > section:last-child { padding-bottom: 8px; }
+  .step-kicker {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .steps h3 { font-size: 1.45rem; }
+  .step-def {
+    margin-top: 10px;
+    font-size: 1.05rem;
+    color: var(--ink-2);
+    max-width: 56ch;
+  }
+  .step-def strong { color: var(--ink); }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .chip {
+    font-size: 0.84rem;
+    color: var(--ink-2);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 22px;
+  }
+  .mini {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    font-size: 0.95rem;
+  }
+  .mini h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .mini p { color: var(--ink-2); }
+  .example {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .example h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    margin-bottom: 8px;
+  }
+  .example p { color: var(--ink-2); font-size: 0.98rem; }
+  .callout {
+    margin-top: 22px;
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-track);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    font-size: 0.98rem;
+    color: var(--ink);
+    max-width: 60ch;
+  }
+
+  /* ---------- reporting comparison ---------- */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+    align-items: stretch;
+  }
+  .compare .card h3 { margin-bottom: 4px; }
+  .compare .sub {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .compare .tiles { display: flex; gap: 12px; flex-wrap: wrap; }
+  .compare .stat-tile { min-width: 140px; padding: 14px 18px; flex: 1; }
+  .compare .stat-tile .value { font-size: 1.7rem; }
+  .card.better { border-color: var(--accent-track); }
+  .compare .stops-here {
+    margin-top: 18px;
+    font-size: 0.92rem;
+    color: var(--ink-2);
+    border-top: 1px solid var(--gridline);
+    padding-top: 14px;
+  }
+  .signal-list { margin-top: 22px; }
+  .signal-list h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .signal-row { margin-bottom: 14px; }
+  .signal-row .row-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.92rem;
+    margin-bottom: 5px;
+  }
+  .signal-row .row-top .val {
+    color: var(--ink-2);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .signal-row .track {
+    height: 12px;
+    background: var(--accent-track);
+    border-radius: 0 4px 4px 0;
+    overflow: hidden;
+  }
+  .signal-row .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+  .signal-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .followup {
+    margin-top: 18px;
+    border-top: 1px solid var(--gridline);
+    padding-top: 14px;
+    font-size: 0.95rem;
+  }
+  .followup strong { display: block; margin-bottom: 2px; }
+  .followup span { color: var(--ink-2); }
+
+  /* ---------- taxonomy ---------- */
+  .taxonomy-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .map-lines { list-style: none; }
+  .map-lines li {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    align-items: baseline;
+  }
+  .map-lines li + li { border-top: 1px solid var(--gridline); }
+  .map-lines .term {
+    flex: none;
+    width: 11.5em;
+    font-weight: 650;
+    font-size: 0.98rem;
+  }
+  .map-lines .role { color: var(--ink-2); font-size: 0.98rem; }
+  .tag-demo { margin-top: 22px; }
+  .tag-demo h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .tag-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    font-size: 0.92rem;
+    color: var(--ink-2);
+  }
+  .tag-row + .tag-row { border-top: 1px solid var(--gridline); }
+  .tag-row .q { max-width: 34ch; }
+  .tag {
+    flex: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-track);
+    border-radius: 999px;
+    padding: 3px 11px;
+    white-space: nowrap;
+  }
+
+  /* ---------- pilot plan ---------- */
+  .pilot-list {
+    list-style: none;
+    counter-reset: pilot;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .pilot-list li {
+    counter-increment: pilot;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 16px 18px 16px 54px;
+    position: relative;
+    font-size: 0.96rem;
+    color: var(--ink-2);
+  }
+  .pilot-list li strong { color: var(--ink); display: block; margin-bottom: 2px; }
+  .pilot-list li::before {
+    content: counter(pilot);
+    position: absolute;
+    left: 16px;
+    top: 17px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: grid;
+    place-items: center;
+  }
+
+  /* ---------- closing ---------- */
+  .closing {
+    padding: 88px 0 96px;
+    background: var(--surface);
+  }
+  .closing h2 { max-width: 30ch; }
+  .closing .lead { margin-top: 18px; max-width: 62ch; }
+  .closing .one-liner {
+    margin-top: 32px;
+    padding: 22px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--page);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 1.05rem;
+    max-width: 62ch;
+  }
+  footer {
+    padding: 28px 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    background: var(--surface);
+  }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 899px) {
+    :root { --stepper-h: 62px; }
+    .scrolly { display: block; }
+    .flowmap {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--page);
+      margin: 0 -24px 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gridline);
+    }
+    .flowmap ol {
+      display: flex;
+      overflow-x: auto;
+      gap: 22px;
+      padding: 2px 24px;
+      scrollbar-width: none;
+    }
+    .flowmap ol::-webkit-scrollbar { display: none; }
+    .flowmap li + li { margin-top: 0; }
+    /* horizontal connector arrows */
+    .flowmap li + li::before {
+      left: -18px;
+      top: 50%;
+      width: 10px;
+      height: 2px;
+      transform: translateY(-50%);
+    }
+    .flowmap li + li::after {
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 5px solid var(--gridline);
+      border-right: none;
+    }
+    .flowmap li.done + li::after,
+    .flowmap li.active + li::after { border-left-color: var(--accent); border-top-color: transparent; }
+    .flow-node { white-space: nowrap; padding: 7px 12px; font-size: 0.85rem; }
+    .flowmap-caption { display: none; }
+    .step-grid, .compare, .taxonomy-grid, .pilot-list { grid-template-columns: 1fr; }
+    .hero { padding: 64px 0 48px; }
+    .band { padding: 56px 0; }
+    .steps > section { padding-bottom: 56px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+
+  .flow-node:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--accent-deep);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker">Learning measurement briefing · Weekly retail trainings</p>
+    <h1>From completion reports to feedback loops</h1>
+    <p class="lead">
+      We already collect signals from every weekly training — completions, quiz scores,
+      survey answers. The opportunity is not more data. It is connecting the data we have
+      to skills, behaviors, and business priorities, so each training tells us something
+      we can act on.
+    </p>
+    <div class="hero-tiles">
+      <div class="stat-tile">
+        <div class="label">Completion</div>
+        <div class="value">96%</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Average quiz score</div>
+        <div class="value">84%</div>
+      </div>
+      <p class="aside">
+        <strong>Both numbers are true.</strong> Neither tells us whether advisors can do
+        anything differently on the floor — or what to do next.
+      </p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ THE MODEL ============ -->
+  <section class="band" id="model" aria-labelledby="model-title">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="kicker">The model</p>
+        <h2 id="model-title">Seven steps, each depending on the one before it</h2>
+        <p class="lead">
+          Training measurement works when it runs as a chain: a business priority defines a
+          skill, the skill shapes the content, the content produces signals, signals become
+          insight, insight becomes action, and the action becomes a story worth telling.
+          Scroll through each step — or tap a node to jump to it.
+        </p>
+      </div>
+
+      <div class="scrolly">
+        <nav class="flowmap" aria-label="Measurement model map">
+          <ol id="flowList">
+            <li><a class="flow-node" href="#step-priority"><span class="num" aria-hidden="true">1</span>Business Priority</a></li>
+            <li><a class="flow-node" href="#step-skill"><span class="num" aria-hidden="true">2</span>Skill / Behavior</a></li>
+            <li><a class="flow-node" href="#step-content"><span class="num" aria-hidden="true">3</span>Training Content</a></li>
+            <li><a class="flow-node" href="#step-signal"><span class="num" aria-hidden="true">4</span>Learning Signal</a></li>
+            <li><a class="flow-node" href="#step-insight"><span class="num" aria-hidden="true">5</span>Insight</a></li>
+            <li><a class="flow-node" href="#step-action"><span class="num" aria-hidden="true">6</span>Action</a></li>
+            <li><a class="flow-node" href="#step-impact"><span class="num" aria-hidden="true">7</span>Impact Story</a></li>
+          </ol>
+          <p class="flowmap-caption">One example runs through every step: a new skincare brand launch.</p>
+        </nav>
+
+        <div class="steps">
+
+          <section id="step-priority" aria-labelledby="h-priority">
+            <p class="step-kicker">Step 1 of 7</p>
+            <h3 id="h-priority">Business Priority</h3>
+            <p class="step-def">
+              <strong>Why does this training exist?</strong> Every weekly training should trace
+              back to something the business is actively trying to do.
+            </p>
+            <div class="chips" aria-label="Typical business priorities">
+              <span class="chip">Brand launch</span>
+              <span class="chip">Service behavior</span>
+              <span class="chip">Operational change</span>
+              <span class="chip">Policy update</span>
+              <span class="chip">Sales priority</span>
+              <span class="chip">Tool adoption</span>
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>It anchors the training to something leadership already cares about, and gives every later measurement a reference point.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>The training becomes content nobody can defend. Results can't be connected to anything the business tracks.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>Support a new brand launch and improve in-store client recommendations.</p>
+            </div>
+          </section>
+
+          <section id="step-skill" aria-labelledby="h-skill">
+            <p class="step-kicker">Step 2 of 7</p>
+            <h3 id="h-skill">Skill / Behavior</h3>
+            <p class="step-def">
+              <strong>What should the learner be able to do differently?</strong> Not what they
+              should know — what they should do, on the floor, with a client.
+            </p>
+            <div class="chips" aria-label="Typical skills and behaviors">
+              <span class="chip">Recommend the right product</span>
+              <span class="chip">Explain a difference</span>
+              <span class="chip">Follow a process</span>
+              <span class="chip">Handle a client question</span>
+              <span class="chip">Avoid a common mistake</span>
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>It translates the priority into something observable, teachable, and measurable. This is what quiz questions will point to later.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>You end up measuring memory of facts instead of change in behavior. Quiz results have nothing to point back to.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>Beauty Advisors can recommend the product to the right client and explain how it differs from the existing assortment.</p>
+            </div>
+          </section>
+
+          <section id="step-content" aria-labelledby="h-content">
+            <p class="step-kicker">Step 3 of 7</p>
+            <h3 id="h-content">Training Content</h3>
+            <p class="step-def">
+              <strong>The actual weekly training material.</strong> This is the intervention —
+              the only part of the system the learner ever sees.
+            </p>
+            <div class="chips" aria-label="Typical content types">
+              <span class="chip">Product facts</span>
+              <span class="chip">Process steps</span>
+              <span class="chip">Brand talking points</span>
+              <span class="chip">Scenario examples</span>
+              <span class="chip">Policy details</span>
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>When content is built around the target skill — not just around information — the signals it produces actually measure the right thing.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>You teach facts and hope behavior follows. There is nothing to practice, so there is nothing meaningful to measure.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>Product claims, ingredients, usage guidance, client talking points, and a comparison to existing products.</p>
+            </div>
+          </section>
+
+          <section id="step-signal" aria-labelledby="h-signal">
+            <p class="step-kicker">Step 4 of 7</p>
+            <h3 id="h-signal">Learning Signal</h3>
+            <p class="step-def">
+              <strong>The measurable evidence collected from the training.</strong> Everything the
+              LMS captures counts — not just the final score.
+            </p>
+            <div class="chips" aria-label="Typical learning signals">
+              <span class="chip">Quiz score</span>
+              <span class="chip">Question-level performance</span>
+              <span class="chip">Confidence rating</span>
+              <span class="chip">Scenario choice</span>
+              <span class="chip">Survey answer</span>
+              <span class="chip">Open-text response</span>
+              <span class="chip">Completion</span>
+            </div>
+            <div class="callout">
+              A quiz score is not the strategy by itself. A quiz score becomes useful when each
+              question is tied to a skill or behavior — then an 84% stops being one number and
+              starts being a map of what landed and what didn't.
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>Signals are the only evidence the system produces. Tagged to skills, they show where the message landed and where it didn't.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>You're left with completion. There is no evidence to interpret, so everything downstream becomes opinion.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>A quiz question on recommendation fit, a scenario question on client need, a confidence rating, and an open-text prompt for concerns.</p>
+            </div>
+          </section>
+
+          <section id="step-insight" aria-labelledby="h-insight">
+            <p class="step-kicker">Step 5 of 7</p>
+            <h3 id="h-insight">Insight</h3>
+            <p class="step-def">
+              <strong>What did the signal tell us?</strong> An insight is a plain-language
+              sentence a merchant or field leader can act on — not a chart.
+            </p>
+            <div class="chips" aria-label="Typical insights">
+              <span class="chip">Completed, but struggled with recommendation logic</span>
+              <span class="chip">Confidence low for one audience</span>
+              <span class="chip">Open text shows confusion about when to apply a process</span>
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>This is where data becomes understanding. One clear sentence per training beats a dashboard nobody opens.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>Data gets collected but nobody learns anything. Dashboards fill up while decisions stay exactly the same.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>Learners understand the product facts, but are less confident choosing when to recommend this product over similar ones.</p>
+            </div>
+          </section>
+
+          <section id="step-action" aria-labelledby="h-action">
+            <p class="step-kicker">Step 6 of 7</p>
+            <h3 id="h-action">Action</h3>
+            <p class="step-def">
+              <strong>What should we do next?</strong> Every insight should trigger one concrete,
+              proportionate follow-up. Small is fine — ignored is not.
+            </p>
+            <div class="chips" aria-label="Typical actions">
+              <span class="chip">Manager huddle guidance</span>
+              <span class="chip">Revise the next weekly training</span>
+              <span class="chip">Clarify a confusing policy</span>
+              <span class="chip">Create a follow-up resource</span>
+              <span class="chip">Give SMEs feedback</span>
+            </div>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>The action is what closes the loop. It is the difference between a reporting habit and a feedback system.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>The insight becomes trivia. Teams stop trusting the measurement, because nothing ever changes as a result of it.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>Add a manager huddle prompt on recommendation scenarios, and include a product comparison chart in the next weekly update.</p>
+            </div>
+          </section>
+
+          <section id="step-impact" aria-labelledby="h-impact">
+            <p class="step-kicker">Step 7 of 7</p>
+            <h3 id="h-impact">Impact Story</h3>
+            <p class="step-def">
+              <strong>How do we explain the value?</strong> A short narrative that connects the
+              training back to the priority it served — evidence included.
+            </p>
+            <div class="step-grid">
+              <div class="mini">
+                <h4>Why it matters</h4>
+                <p>It makes the value of training visible in business language, and builds the case for the next investment.</p>
+              </div>
+              <div class="mini">
+                <h4>If this step is skipped</h4>
+                <p>The value stays invisible. Training keeps being discussed as a cost, and budget conversations get harder every year.</p>
+              </div>
+            </div>
+            <div class="example">
+              <h4>Running example · Skincare brand launch</h4>
+              <p>The training did more than drive completion. It supported the launch, measured whether the message landed, surfaced a recommendation gap, and triggered a follow-up action tied to the launch.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OLD VS BETTER REPORTING ============ -->
+  <section class="band" id="reporting" aria-labelledby="reporting-title">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="kicker">What changes in practice</p>
+        <h2 id="reporting-title">Same training. Same data. Different report.</h2>
+        <p class="lead">
+          The skincare launch training, reported two ways. The better version uses the same LMS
+          data — it just ties each question to a skill before reading the numbers.
+        </p>
+      </div>
+      <div class="compare">
+        <div class="card">
+          <h3>Old reporting</h3>
+          <p class="sub">What most training reports look like today</p>
+          <div class="tiles">
+            <div class="stat-tile">
+              <div class="label">Completion</div>
+              <div class="value">96%</div>
+            </div>
+            <div class="stat-tile">
+              <div class="label">Average quiz score</div>
+              <div class="value">84%</div>
+            </div>
+          </div>
+          <p class="stops-here">
+            That's the whole report. It confirms people showed up and passed. It can't say what
+            they can do, where they struggle, or what to do next.
+          </p>
+        </div>
+        <div class="card better">
+          <h3>Better reporting</h3>
+          <p class="sub">Same numbers, plus questions tagged to skills</p>
+          <div class="tiles">
+            <div class="stat-tile">
+              <div class="label">Completion</div>
+              <div class="value">96%</div>
+            </div>
+            <div class="stat-tile">
+              <div class="label">Average quiz score</div>
+              <div class="value">84%</div>
+            </div>
+          </div>
+          <div class="signal-list">
+            <h4>Signals by skill area</h4>
+            <div class="signal-row">
+              <div class="row-top">
+                <span>Product facts — strong</span>
+                <span class="val">93%</span>
+              </div>
+              <div class="track"><div class="fill" style="width:93%"></div></div>
+            </div>
+            <div class="signal-row">
+              <div class="row-top">
+                <span>Recommendation scenarios — weak</span>
+                <span class="val">64%</span>
+              </div>
+              <div class="track"><div class="fill" style="width:64%"></div></div>
+            </div>
+            <div class="signal-row">
+              <div class="row-top">
+                <span>Confident comparing to existing products</span>
+                <span class="val">48%</span>
+              </div>
+              <div class="track"><div class="fill" style="width:48%"></div></div>
+            </div>
+            <p class="signal-note">Illustrative values from the skincare launch example.</p>
+          </div>
+          <div class="followup">
+            <strong>Recommended follow-up</strong>
+            <span>Manager huddle on recommendation scenarios, plus a comparison chart in the next weekly update.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAXONOMY ============ -->
+  <section class="band" id="taxonomy" aria-labelledby="taxonomy-title">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="kicker">The connective tissue</p>
+        <h2 id="taxonomy-title">The taxonomy is the map</h2>
+        <p class="lead">
+          The tagging model is what connects everything above. It doesn't need to be big —
+          it needs to exist.
+        </p>
+      </div>
+      <div class="taxonomy-grid">
+        <div class="card">
+          <ul class="map-lines">
+            <li><span class="term">The taxonomy</span><span class="role">is the map.</span></li>
+            <li><span class="term">The learning signal</span><span class="role">is the evidence.</span></li>
+            <li><span class="term">The content</span><span class="role">is the intervention.</span></li>
+            <li><span class="term">The business priority</span><span class="role">explains why it matters.</span></li>
+            <li><span class="term">The action</span><span class="role">closes the loop.</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="card">
+            <h3>Start lightweight</h3>
+            <p class="step-def" style="margin-top:8px; font-size:0.96rem;">
+              No huge skills taxonomy required. Seven starter tags are enough to begin — every
+              quiz question, survey question, and open-text prompt gets one.
+            </p>
+            <div class="chips" aria-label="Starter tags">
+              <span class="chip">Product Knowledge</span>
+              <span class="chip">Client Experience</span>
+              <span class="chip">Selling Behavior</span>
+              <span class="chip">Operational Execution</span>
+              <span class="chip">Policy / Compliance</span>
+              <span class="chip">Systems / Tools</span>
+              <span class="chip">Leadership / Coaching</span>
+            </div>
+            <div class="tag-demo">
+              <h4>Tagging in practice</h4>
+              <div class="tag-row">
+                <span class="q">Quiz: "Which key ingredient sets this serum apart?"</span>
+                <span class="tag">Product Knowledge</span>
+              </div>
+              <div class="tag-row">
+                <span class="q">Scenario: "A client with sensitive skin asks what you'd recommend…"</span>
+                <span class="tag">Selling Behavior</span>
+              </div>
+              <div class="tag-row">
+                <span class="q">Open text: "What would make you hesitant to recommend it?"</span>
+                <span class="tag">Client Experience</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PILOT PLAN ============ -->
+  <section class="band" id="pilot" aria-labelledby="pilot-title">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="kicker">How to start</p>
+        <h2 id="pilot-title">A pilot, not a program</h2>
+        <p class="lead">
+          Prove the loop on a handful of trainings before scaling anything. Seven steps,
+          a few weekly cycles, no new tooling required.
+        </p>
+      </div>
+      <ol class="pilot-list">
+        <li><strong>Pick 3–5 weekly trainings</strong> using the new template.</li>
+        <li><strong>Define the business priority</strong> for each training.</li>
+        <li><strong>Identify the skill or behavior</strong> the training supports.</li>
+        <li><strong>Tag quiz and survey questions</strong> to that skill or behavior.</li>
+        <li><strong>Report the learning signals</strong> — scores, confidence, open text.</li>
+        <li><strong>Translate the signals into one recommended action</strong> per training.</li>
+        <li><strong>Review patterns</strong> after several cycles and adjust the model.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING ============ -->
+  <section class="closing" id="close" aria-labelledby="close-title">
+    <div class="wrap">
+      <p class="kicker">The point</p>
+      <h2 id="close-title">Not more reporting. Better loops.</h2>
+      <p class="lead">
+        The goal is not to create more reporting for its own sake. The goal is to turn weekly
+        trainings into measurable feedback loops — where every training supports a priority,
+        produces evidence, surfaces a gap or a win, and triggers one next step.
+      </p>
+      <p class="one-liner">
+        We already have signals, like quiz scores. The opportunity is to connect those signals
+        to skills, behaviors, and business priorities — so weekly trainings become a feedback
+        loop instead of a completion report.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">Learning measurement briefing · Weekly retail trainings</div>
+</footer>
+
+<script>
+(function () {
+  var flowItems = Array.prototype.slice.call(document.querySelectorAll('#flowList > li'));
+  var flowLinks = flowItems.map(function (li) { return li.querySelector('.flow-node'); });
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.steps > section'));
+  var flowNav = document.querySelector('.flowmap');
+  var flowList = document.getElementById('flowList');
+  var progressBar = document.getElementById('progressBar');
+  var activeIndex = -1;
+
+  function setActive(index) {
+    if (index === activeIndex) return;
+    activeIndex = index;
+    flowItems.forEach(function (li, i) {
+      li.classList.toggle('active', i === index);
+      li.classList.toggle('done', i < index);
+      if (i === index) {
+        flowLinks[i].setAttribute('aria-current', 'step');
+      } else {
+        flowLinks[i].removeAttribute('aria-current');
+      }
+    });
+    // keep the active chip visible in the mobile horizontal stepper
+    if (index >= 0 && window.matchMedia('(max-width: 899px)').matches) {
+      var li = flowItems[index];
+      var target = li.offsetLeft - (flowList.clientWidth - li.offsetWidth) / 2;
+      flowList.scrollTo({
+        left: Math.max(0, target),
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+      });
+    }
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // Scroll-driven highlighting: the step nearest the upper-middle of the
+  // viewport is active. A scroll listener (rAF-throttled) is more reliable
+  // here than IntersectionObserver, since sections vary a lot in height.
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+
+      // progress bar
+      var doc = document.documentElement;
+      var max = doc.scrollHeight - window.innerHeight;
+      progressBar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+
+      // active step
+      var line = window.innerHeight * 0.38;
+      var current = -1;
+      for (var i = 0; i < steps.length; i++) {
+        var r = steps[i].getBoundingClientRect();
+        if (r.top <= line && r.bottom > line * 0.5) current = i;
+      }
+      // before the model section starts, nothing is active;
+      // past the last step, keep the last node lit while still in the section
+      var modelRect = document.getElementById('model').getBoundingClientRect();
+      if (current === -1 && modelRect.top < line && modelRect.bottom > line) {
+        current = modelRect.top < 0 ? steps.length - 1 : 0;
+      }
+      setActive(current);
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
